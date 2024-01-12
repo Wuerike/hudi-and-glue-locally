@@ -1,0 +1,58 @@
+version: "3"
+
+services:
+  glue:
+    container_name: glue_jupyter
+    command: /home/glue_user/jupyter/jupyter_start.sh && sudo chown -R 10000:10000 /home/glue_user/workspace/jupyter_workspace
+    environment:
+      - DISABLE_SSL=true
+      - AWS_PROFILE=glue4
+      - DATALAKE_FORMATS=hudi
+    image: amazon/aws-glue-libs:glue_libs_4.0.0_image_01
+    ports:
+      # Spark web UI
+      - '4040:4040' 
+      - '4041:4041'
+      # Spark History server
+      - '28080:18080'
+      - '28081:18081'
+      # Jupyter web server
+      - '8998:8998'
+      - '8888:8888'
+    restart: always
+    volumes:
+      - ./notebooks:/home/glue_user/workspace/jupyter_workspace/
+
+  minio:
+    image: minio/minio
+    hostname: minio
+    container_name: minio
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+      - MINIO_DOMAIN=minio
+    networks:
+      default:
+        aliases:
+          - warehouse.minio
+    ports:
+      - 9001:9001
+      - 9000:9000
+    command: ["server", "/data", "--console-address", ":9001"]
+
+  aws:
+    image: amazon/aws-cli
+    hostname: aws-cli
+    container_name: aws-cli
+    volumes:
+      - ./data:/home/data
+    command: |
+      -c "sleep 2 && \
+      aws --endpoint-url http://minio:9000 s3 mb s3://warehouse --region eu-west-1 ; \
+      aws --endpoint-url http://minio:9000 s3 cp /home/data s3://warehouse/raw --recursive"
+    entrypoint: [/bin/bash]
+    environment: 
+      AWS_ACCESS_KEY_ID: "minioadmin"
+      AWS_SECRET_ACCESS_KEY: "minioadmin"
+    depends_on: 
+      - minio
