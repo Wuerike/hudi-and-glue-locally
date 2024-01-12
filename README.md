@@ -10,21 +10,17 @@ docker compose up
 
 ## Docker Compose Details
 
-- glue: AWS Glue + Spark environment
-- minio: Object storage compatible with Amazon S3
-- aws: AWS CLI to create a Minio bucket
-
 ### AWS Glue
 
-You can open the jupyter lab at http://localhost:8888/lab/ and use the sample notebook to CRUD a Hudi table.
+It's the AWS Glue + Spark environment, you can use it by opening the jupyter lab at http://localhost:8888/lab/, the `hudi_evaluation` sample notebook contains basic CRUD operations on Apache Hudi table.
 
 Refer to this [AWS blog post](https://aws.amazon.com/pt/blogs/big-data/develop-and-test-aws-glue-version-3-0-jobs-locally-using-a-docker-container/)
  to check more details about it.
 
 ### Minio
 
-You can acces the Minio UI at http://localhost:9000, it will require an user and a password, both are set to `minioadmin`
+Object storage compatible with Amazon S3, you can acces the Minio UI at http://localhost:9000, it will require an user and a password, both are set to `minioadmin`
 
 ### AWS CLI
 
-The AWS CLI will create a bucket called `warehouse` and move the sample data at `data/transactions.json` to `warehouse/raw`.
+CLI to apply s3 commands, it's used to create a bucket called `warehouse` and move the sample data from `data/transactions.json` to `warehouse/raw`.
